@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_meals/providers/filters_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 // import 'package:flutter_meals/screens/tabs.dart';
 // import 'package:flutter_meals/widgets/main_drawer.dart';
 
-enum Filter {
-  glutenFree,
-  lactoseFree,
-  vegetarian,
-}
-
-class FilterScreen extends StatefulWidget {
+class FilterScreen extends ConsumerStatefulWidget {
   const FilterScreen({
     super.key,
-    required this.currentFilters,
   });
 
-  final Map<Filter, bool> currentFilters;
-
   @override
-  State<FilterScreen> createState() {
+  ConsumerState<FilterScreen> createState() {
     return _FilterScreenState();
   }
 }
 
-class _FilterScreenState extends State<FilterScreen> {
+class _FilterScreenState extends ConsumerState<FilterScreen> {
   var _glutenFreeFilterSet = false;
   var _lactoseFreeFilterSet = false;
   var _vegetarianFilterSet = false;
@@ -30,9 +24,10 @@ class _FilterScreenState extends State<FilterScreen> {
   @override
   void initState() {
     super.initState();
-    _glutenFreeFilterSet = widget.currentFilters[Filter.glutenFree]!;
-    _lactoseFreeFilterSet = widget.currentFilters[Filter.lactoseFree]!;
-    _vegetarianFilterSet = widget.currentFilters[Filter.vegetarian]!;
+    final activeFilters = ref.read(filterProvider);
+    _glutenFreeFilterSet = activeFilters[Filter.glutenFree]!;
+    _lactoseFreeFilterSet = activeFilters[Filter.lactoseFree]!;
+    _vegetarianFilterSet = activeFilters[Filter.vegetarian]!;
   }
 
   @override
@@ -54,15 +49,16 @@ class _FilterScreenState extends State<FilterScreen> {
       //   },
       // ),
       body: PopScope(
-        canPop: false,
+        canPop: true,
         onPopInvokedWithResult: (bool didPop, dynamic result) {
-          if (didPop) return;
+          // if (didPop) return;
           {
-            Navigator.of(context).pop({
+            ref.read(filterProvider.notifier).setFilters({
               Filter.glutenFree: _glutenFreeFilterSet,
               Filter.lactoseFree: _lactoseFreeFilterSet,
               Filter.vegetarian: _vegetarianFilterSet,
             });
+            // Navigator.of(context).pop();
           }
         },
         child: Column(
